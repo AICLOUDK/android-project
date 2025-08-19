@@ -1,0 +1,61 @@
+// Import necessary classes
+import android.os.AsyncTask;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+// Inside your Activity class
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Call the method to perform GET request
+        new GetDataTask().execute("https://jsonplaceholder.typicode.com/posts/1");
+    }
+
+    // AsyncTask to perform network operation on background thread
+    private class GetDataTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            String urlString = params[0];
+            StringBuilder result = new StringBuilder();
+
+            try {
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                // Optional: set headers if needed
+                // conn.setRequestProperty("Header-Name", "value");
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream())
+                );
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            return result.toString();
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            // Handle the response here
+            // e.g., update UI with fetched data
+            TextView textView = findViewById(R.id.textView);
+            textView.setText(result);
+        }
+    }
+}
